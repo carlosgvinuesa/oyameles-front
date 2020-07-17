@@ -60,10 +60,11 @@ export const createLoteSuccess = (payload) => ({
   payload,
 });
 
-export const fetchLotes = () => (dispatch) => {
+export const fetchLotes = (id) => (dispatch) => {
   dispatch(loadingLotes());
+  const url = id ? `http://localhost:3000/lotes/lotes?_id=${id}`: `http://localhost:3000/lotes/lotes`;
   return axios
-    .get("http://localhost:3000/lotes/lotes")
+    .get(url)
     .then((res) => {
       const items = normalizeData(res.data.result);
       dispatch(getLotesSuccess(items));
