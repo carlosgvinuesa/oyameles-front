@@ -44,7 +44,7 @@ const Ventas = () => {
       });
       setPayments(pagos);
     }
-  }, [dispatch, id]);
+  }, [dispatch, id ]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
