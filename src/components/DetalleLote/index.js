@@ -1,29 +1,61 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Section from "~commons/Section";
 import { fetchVentas } from "~redux/VentaDuck";
 import { fetchLotes } from "~redux/LoteDuck";
-import { denormalizeData } from "../../utils/formatters";
+import { denormalizeData, currencyFormat } from "../../utils/formatters";
 import { useParams } from "react-router-dom";
 import Slider from "~commons/Slider";
 import InputField from "~commons/form/InputField";
+import * as dayjs from "dayjs";
 
 const Ventas = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
   const ventas = useSelector((state) => state.ventas.items);
   const lote = useSelector((state) => state.lotes.items[id]) || {};
-
-  useEffect(() => {
-    dispatch(fetchVentas());
-    dispatch(fetchLotes(id));
-  }, [dispatch, id]);
+  const [creditoData, setCreditoData] = useState({});
+  const [payments, setPayments] = useState([]);
 
   // const lote = denormalizeData(lotes).find((x) => x._id === id) || {};
   const venta = denormalizeData(ventas).find((x) => x.lote._id === id) || {};
 
+  const detalleCredito = (propiedad) =>
+    venta.detalle_credito === undefined ? "" : venta.detalle_credito[propiedad];
+
+  useEffect(() => {
+    dispatch(fetchVentas());
+    dispatch(fetchLotes(id));
+    if (ventas) {
+      let pagos = corridaCredito(
+        detalleCredito("pago_mensual"),
+        detalleCredito("meses"),
+        detalleCredito("fecha_inicial"),
+        detalleCredito("principal"),
+        detalleCredito("tasa")
+      );
+      setCreditoData({
+        pago_mesual: detalleCredito("pago_mensual"),
+        meses: detalleCredito("meses"),
+        años: detalleCredito("años"),
+        fecha_inicial: detalleCredito("fecha_inicial"),
+        principal: detalleCredito("principal"),
+        tasa: detalleCredito("tasa"),
+      });
+      setPayments(pagos);
+    }
+  }, [dispatch, id]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    let pagos = corridaCredito(
+      creditoData["pago_mensual"],
+      creditoData["meses"],
+      creditoData["fecha_inicial"],
+      creditoData["principal"],
+      creditoData["tasa"]
+    );
+    setPayments(pagos);
     // const formData = new FormData();
     // for (let key in product) {
     //   if (key === "images") {
@@ -34,13 +66,30 @@ const Ventas = () => {
     //     formData.append(key, product[key]);
     //   }
     // }
-    // dispatch(createProduct(formData));
+    // dispatch(createVenta(formData));
   };
 
   const handleChange = (e) => {
     const key = e.target.name;
     const value = e.target.files || e.target.value;
-    // setVenta((prevState) => ({ ...prevState, [key]: value }));
+    const meses = creditoData["años"] * 12;
+    const tasa = creditoData["tasa"] / 100 / 12;
+    const pagoMensual =
+      (creditoData["principal"] *
+        tasa *
+        Math.pow(1 + tasa, creditoData["meses"])) /
+      (Math.pow(1 + tasa, creditoData["meses"]) - 1);
+    const enganche = (creditoData["enganche_%"] / 100) * lote.precio_total;
+    const principal = lote.precio_total - creditoData["enganche_$"];
+    setCreditoData((prevState) => ({
+      ...prevState,
+      [key]: value,
+      meses: meses,
+      pago_mensual: pagoMensual,
+      enganche_$: enganche,
+      principal: principal,
+    }));
+    console.log(creditoData, tasa, pagoMensual);
   };
 
   const propiedad = (propiedad) =>
@@ -48,38 +97,45 @@ const Ventas = () => {
       ? "ND"
       : propiedad.join(", ");
 
-  const detalleCredito = (propiedad) =>
-    venta.detalle_credito === undefined ? "" : venta.detalle_credito[propiedad];
-   
   const corridaCredito = (pago, periodos, fecha, saldo, tasa) => {
     let i;
-    let pagos = [{
-      periodo: 0,
-      fecha: fecha,
-      saldo_inicial: 0,
-      pago_mensual: 0,
-      intereses: 0,
-      principal: 0,
-      saldo_final: saldo,
-      intereses_acumulados: 0,
-    }]
-    for (i = 0; i < periodos; i++) {
-      pagos.push({
-      periodo: i+1,
-      fecha: pagos[i].fecha+1,
-      saldo_inicial: pagos[i].saldo_final,
-      pago_mensual: pago,
-      intereses: pagos[i].saldo_final*(tasa/100)/12,
-      principal: pago-(pagos[i].saldo_final*(tasa/100)/12),
-      saldo_final: pagos[i].saldo_final-(pago-(pagos[i].saldo_final*(tasa/100)/12)),
-      intereses_acumulados: (pagos[i].saldo_final*(tasa/10)/12)+pagos[i].intereses_acumulados,
-      })
-      }
-      return pagos;
-  }
+    let pagos = [
+      {
+        periodo: 0,
+        fecha: dayjs(fecha).format("DD/MMMM/YYYY"),
+        saldo_inicial: 0,
+        pago_mensual: 0,
+        intereses: 0,
+        principal: 0,
+        saldo_final: Number(saldo),
+        intereses_acumulados: 0,
+      },
+    ];
 
-  console.log("el credito", corridaCredito(55610.75,24,111,1205132.5,10))
-     
+    for (i = 0; i < Number(periodos); i++) {
+      pagos = [
+        ...pagos,
+        {
+          periodo: i + 1,
+          fecha: dayjs(pagos[i].fecha).add(1, "month").format("DD/MMMM/YYYY"),
+          saldo_inicial: pagos[i].saldo_final,
+          pago_mensual: Number(pago),
+          intereses: (pagos[i].saldo_final * (Number(tasa) / 100)) / 12,
+          principal:
+            Number(pago) - (pagos[i].saldo_final * (Number(tasa) / 100)) / 12,
+          saldo_final:
+            pagos[i].saldo_final -
+            (Number(pago) - (pagos[i].saldo_final * (Number(tasa) / 100)) / 12),
+          intereses_acumulados:
+            (pagos[i].saldo_final * (Number(tasa) / 10)) / 12 +
+            pagos[i].intereses_acumulados,
+        },
+      ];
+    }
+    return pagos;
+  };
+
+  console.log(venta);
 
   return (
     <div>
@@ -136,54 +192,67 @@ const Ventas = () => {
           >
             <InputField
               name="fecha_inicial"
-              placeholder="Fecha Inicial"
-              value={detalleCredito("fecha_inicial")}
-              handleChange={handleChange}
-            />
-            <InputField
-              name="enganche_$"
-              placeholder="Enganche en $MXN"
-              value={detalleCredito("enganche_$")}
+              title="Fecha Inicial"
+              placeholder={detalleCredito("fecha_inicial")}
+              value={creditoData["fecha_inicial"] || ""}
               handleChange={handleChange}
             />
             <InputField
               name="enganche_%"
-              placeholder="Enganche en %"
-              value={detalleCredito("enganche_%")}
+              title="Enganche (%)"
+              placeholder={detalleCredito("enganche_%")}
+              value={creditoData["enganche_%"] || ""}
               handleChange={handleChange}
             />
             <InputField
-              name="pricipal"
-              placeholder="Principal"
-              value={detalleCredito("principal")}
+              disabled
+              name="enganche_$"
+              title="Enganche ($MXN)"
+              placeholder={detalleCredito("enganche_$")}
+              value={creditoData["enganche_$"] || ""}
+              handleChange={handleChange}
+            />
+            <InputField
+              disabled
+              name="principal"
+              title="Principal"
+              placeholder={detalleCredito("principal")}
+              value={creditoData["principal"] ? creditoData["principal"] : ""}
               handleChange={handleChange}
             />
             <InputField
               name="tasa"
-              placeholder="Tasa (%)"
-              value={detalleCredito("enganche_$")}
+              title="Tasa (%)"
+              placeholder={detalleCredito("tasa")}
+              value={creditoData["tasa"] || ""}
               handleChange={handleChange}
             />
             <InputField
               name="años"
-              placeholder="Años"
-              value={detalleCredito("años")}
+              title="Años"
+              placeholder={detalleCredito("años")}
+              value={creditoData["años"] || ""}
               handleChange={handleChange}
             />
             <InputField
+              disabled
               name="meses"
-              placeholder="Meses"
-              value={detalleCredito("meses")}
+              title="Meses"
+              placeholder={detalleCredito("meses")}
+              value={creditoData["meses"] || ""}
               handleChange={handleChange}
             />
             <InputField
+              disabled
               name="pago_mensual"
-              placeholder="Pago Mensual"
-              value={detalleCredito("pago_mensual")}
+              title="Pago Mensual"
+              placeholder={detalleCredito("pago_mensual")}
+              value={creditoData["pago_mensual"] || ""}
               handleChange={handleChange}
             />
             <InputField
               name="images"
+              title="Product images"
               placeholder="Product images"
               type="file"
               handleChange={handleChange}
@@ -194,7 +263,7 @@ const Ventas = () => {
         </div>
       </Section>
       <Section>
-      <table className="uk-table uk-table-middle uk-table-divider">
+        <table className="uk-table uk-table-middle uk-table-divider uk-table-striped table uk-table-small uk-table-responsive">
           <thead>
             <tr>
               <th className="uk-width-small">Periodo</th>
@@ -208,19 +277,21 @@ const Ventas = () => {
             </tr>
           </thead>
           <tbody>
-            {
-
-                <tr>
-                  <td>{lote.numero}</td>
-                  <td>{lote.cliente}</td>
-                  <td>{lote.area}</td>
-                  <td>{lote.precio_m2}</td>
-                  <td>{lote.precio_total}</td>
-                  <td>{lote.status}</td>
-                  <td>{lote.descripcion}</td>
+            {payments
+              .sort((a, b) => a.periodo - b.periodo)
+              .map((pago, index) => (
+                <tr key={index}>
+                  <td>{pago.periodo}</td>
+                  <td>{pago.fecha}</td>
+                  <td>{currencyFormat(pago.saldo_inicial, "$", 1)}</td>
+                  <td>{currencyFormat(pago.pago_mensual, "$", 1)}</td>
+                  <td>{currencyFormat(pago.intereses, "$", 1)}</td>
+                  <td>{currencyFormat(pago.principal, "$", 1)}</td>
+                  <td>{currencyFormat(pago.saldo_final, "$", 1)}</td>
+                  <td>{currencyFormat(pago.intereses_acumulados, "$", 1)}</td>
                   <td></td>
                 </tr>
-              }
+              ))}
           </tbody>
         </table>
       </Section>
