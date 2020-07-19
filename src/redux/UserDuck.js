@@ -1,4 +1,5 @@
 import axios from "axios";
+import { base_url } from "./variables";
 import { normalizeData } from "../utils/formatters";
 axios.defaults.withCredentials = true;
 
@@ -129,7 +130,7 @@ export const deleteUserError = (error) => ({
 export const login = (credential, push) => (dispatch) => {
   dispatch(loading());
   return axios
-    .post("http://localhost:3000/users/login", credential)
+    .post(`${base_url}/users/login`, credential)
     .then((res) => {
       const user = res.data.user;
       localStorage.setItem("user", JSON.stringify(user));
@@ -141,7 +142,7 @@ export const login = (credential, push) => (dispatch) => {
 
 export const logout = (credential, push) => (dispatch) => {
   return axios
-    .post("http://localhost:3000/users/logout", credential)
+    .post(`${base_url}/users/logout`, credential)
     .then((res) => {
       const user = res.data.user;
       localStorage.removeItem("user", JSON.stringify(user));
@@ -153,7 +154,7 @@ export const logout = (credential, push) => (dispatch) => {
 export const getUsers = () => (dispatch) => {
   dispatch(loading());
   return axios
-      .get(`http://localhost:3000/users`)
+      .get(`${base_url}/users`)
       .then((res) => {
           const users = normalizeData(res.data.result);
           dispatch(getUsersSuccess(users));
@@ -166,7 +167,7 @@ export const getUsers = () => (dispatch) => {
 export const createUser = (data) => (dispatch) => {
   dispatch(loading());
   return axios
-      .post(`http://localhost:3000/users`, data, { headers: { "Content-Type": "multipart/form-data" } })
+      .post(`${base_url}/users`, data, { headers: { "Content-Type": "multipart/form-data" } })
       .then((res) => {
           dispatch(createUserSuccess(res.data.msg));
       })
@@ -178,7 +179,7 @@ export const createUser = (data) => (dispatch) => {
 export const editUser = (params) => (dispatch) => {
   dispatch(loading());
   return axios
-      .patch(`http://localhost:3000/users/${params.id}`, params.data)
+      .patch(`${base_url}/users/${params.id}`, params.data)
       .then((res) => {
           dispatch(editUserSuccess(res.data.result));
       })
@@ -190,7 +191,7 @@ export const editUser = (params) => (dispatch) => {
 export const deleteUser = (id) => (dispatch) => {
   dispatch(loading());
   return axios
-      .delete(`http://localhost:3000/users/${id}`)
+      .delete(`${base_url}/users/${id}`)
       .then((res) => {
           dispatch(deleteUserSuccess(res.data.user));
       })

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { base_url } from "./variables";
 import { normalizeData } from "../utils/formatters";
 
 //Action types
@@ -114,7 +115,7 @@ export const deletePagoError = (error) => ({
 export const fetchPagos = () => (dispatch) => {
   dispatch(loadingPagos());
   return axios
-    .get("http://localhost:3000/pagos")
+    .get("http://localhost:3000/api/pagos")
     .then((res) => {
       const items = normalizeData(res.data.result);
       dispatch(getPagosSuccess(items));
@@ -127,7 +128,7 @@ export const fetchPagos = () => (dispatch) => {
 export const createPago = (data, push) => (dispatch) => {
   dispatch(loadingPagos());
   return axios
-    .post("http://localhost:3000/pagos", data, {
+    .post(`${base_url}/pagos`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -140,7 +141,7 @@ export const createPago = (data, push) => (dispatch) => {
 export const editPago = (params) => (dispatch) => {
   dispatch(loadingPagos());
   return axios
-    .patch(`http://localhost:3000/pagos/${params.id}`, params.data, {
+    .patch(`${base_url}/pagos/${params.id}`, params.data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -156,7 +157,7 @@ export const editPago = (params) => (dispatch) => {
 export const deletePago = (id) => (dispatch) => {
   dispatch(loadingPagos());
   return axios
-    .delete(`http://localhost:3000/pagos/${id}`)
+    .delete(`${base_url}/pagos/${id}`)
     .then((res) => {
       dispatch(deletePagoSuccess(res.data.result));
     })

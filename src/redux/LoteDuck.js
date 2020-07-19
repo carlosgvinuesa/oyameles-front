@@ -1,4 +1,5 @@
 import axios from "axios";
+import { base_url } from "./variables";
 import { normalizeData } from "../utils/formatters";
 
 //Action types
@@ -114,8 +115,8 @@ export const deleteLoteError = (error) => ({
 export const fetchLotes = (id) => (dispatch) => {
   dispatch(loadingLotes());
   const url = id
-    ? `http://localhost:3000/lotes/lotes?_id=${id}`
-    : `http://localhost:3000/lotes/lotes`;
+    ? `${base_url}/lotes/lotes?_id=${id}`
+    : `${base_url}/lotes/lotes`;
   return axios
     .get(url)
     .then((res) => {
@@ -130,7 +131,7 @@ export const fetchLotes = (id) => (dispatch) => {
 export const createLote = (data, push) => (dispatch) => {
   dispatch(loadingLotes());
   return axios
-    .post("http://localhost:3000/lotes", data, {
+    .post(`${base_url}/lotes`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -143,7 +144,7 @@ export const createLote = (data, push) => (dispatch) => {
 export const editLote = (params) => (dispatch) => {
   dispatch(loadingLotes());
   return axios
-    .patch(`http://localhost:3000/lotes/${params.id}`, params.data, {
+    .patch(`${base_url}/lotes/${params.id}`, params.data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -159,11 +160,11 @@ export const editLote = (params) => (dispatch) => {
 export const deleteLote = (id) => (dispatch) => {
   dispatch(loadingLotes());
   return axios
-      .delete(`http://localhost:3000/lotes/${id}`)
-      .then((res) => {
-          dispatch(deleteLoteSuccess(res.data.result));
-      })
-      .catch((err) => {
-          dispatch(deleteLoteError(err));
-      })
+    .delete(`${base_url}/lotes/${id}`)
+    .then((res) => {
+      dispatch(deleteLoteSuccess(res.data.result));
+    })
+    .catch((err) => {
+      dispatch(deleteLoteError(err));
+    });
 };

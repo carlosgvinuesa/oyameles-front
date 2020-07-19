@@ -1,4 +1,5 @@
 import axios from "axios";
+import { base_url } from "./variables";
 import { normalizeData } from "../utils/formatters";
 
 //Action types
@@ -115,7 +116,7 @@ export const deleteVentaError = (error) => ({
 export const fetchVentas = () => (dispatch) => {
   dispatch(loadingVentas());
   return axios
-    .get("http://localhost:3000/ventas")
+    .get(`${base_url}/ventas`)
     .then((res) => {
       const items = normalizeData(res.data.result);
       dispatch(getVentasSuccess(items));
@@ -128,7 +129,7 @@ export const fetchVentas = () => (dispatch) => {
 export const createVenta = (data, push) => (dispatch) => {
   dispatch(loadingVentas());
   return axios
-    .post("http://localhost:3000/ventas", data, {
+    .post(`${base_url}/ventas`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -144,7 +145,7 @@ export const createVenta = (data, push) => (dispatch) => {
 export const editVenta = (params) => (dispatch) => {
   dispatch(loadingVentas());
   return axios
-    .patch(`http://localhost:3000/${params.id}`, params.data, {
+    .patch(`${base_url}/ventas/${params.id}`, params.data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -160,7 +161,7 @@ export const editVenta = (params) => (dispatch) => {
 export const deleteVenta = (id) => (dispatch) => {
   dispatch(loadingVentas());
   return axios
-      .delete(`http://localhost:3000/ventas/${id}`)
+      .delete(`${base_url}/ventas/${id}`)
       .then((res) => {
           dispatch(deleteVentaSuccess(res.data.result));
       })
