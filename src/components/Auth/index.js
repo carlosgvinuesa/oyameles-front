@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Section from "~commons/Section";
 import { useLocation, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "~redux/UserDuck";
+import { login, signup } from "~redux/AuthDuck";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 
@@ -22,9 +22,12 @@ const Auth = () => {
   const status = useSelector((state) => state.user.status);
   const isLogin = location.pathname.includes("login");
   const [credentials, setCredentials] = useState({});
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login(credentials, push));
+    isLogin
+      ? dispatch(login(credentials, push))
+      : dispatch(signup(credentials));
   };
 
   const handleChange = (e) => {
@@ -44,6 +47,46 @@ const Auth = () => {
               className="uk-width-1-1 uk-form-stacked uk-flex uk-flex-center uk-flex-column"
             >
               <div className="uk-margin">
+                {isLogin ? (
+                  ""
+                ) : (
+                  <div>
+                    <label className="uk-form-label" htmlFor="email">
+                      Nombre:
+                    </label>
+                    <div className="uk-inline">
+                      <span
+                        className="uk-form-icon uk-form-icon-flip"
+                        uk-icon=""
+                      ></span>
+                      <input
+                        onChange={handleChange}
+                        id="nombre"
+                        name="nombre"
+                        className="uk-input"
+                        type="text"
+                        required
+                      />
+                    </div>
+                    <label className="uk-form-label" htmlFor="email">
+                      Apellido:
+                    </label>
+                    <div className="uk-inline">
+                      <span
+                        className="uk-form-icon uk-form-icon-flip"
+                        uk-icon=""
+                      ></span>
+                      <input
+                        onChange={handleChange}
+                        id="apellido"
+                        name="apellido"
+                        className="uk-input"
+                        type="text"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
                 <label className="uk-form-label" htmlFor="email">
                   Email:
                 </label>

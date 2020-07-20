@@ -26,11 +26,3 @@ export const currencyFormat = (num = 0, symbol = "", decimales = 2) => {
   return result;
 };
 
-export const toNumber = (num = 0) => {
-  let format = /[$]/;
-  if (format.test(num)) {
-    num = num.replace("/[$]/", "");
-  }
-  num = parseFloat(num);
-  return num;
-};

@@ -14,7 +14,7 @@ const Routes = () => (
       <Auth />
     </Route>
     <Route exact path="/signup">
-      <h1>signup</h1>
+      <Auth />
     </Route>
     <Route exact path="/lotes">
       <Lotes />

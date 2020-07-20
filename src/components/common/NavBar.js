@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "~redux/UserDuck";
+import { logout } from "~redux/AuthDuck";
 import { useHistory } from "react-router-dom";
 
 const Navbar = () => {
@@ -44,7 +44,7 @@ const Navbar = () => {
           {user && (
             <li>
               <Link to="/profile">
-                {user.nombre} {user.apellido}
+                {user.nombre}
               </Link>
               <div className="uk-navbar-dropdown">
                 <ul className="uk-nav uk-navbar-dropdown-nav">

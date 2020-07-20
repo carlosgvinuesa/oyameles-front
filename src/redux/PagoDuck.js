@@ -115,7 +115,7 @@ export const deletePagoError = (error) => ({
 export const fetchPagos = () => (dispatch) => {
   dispatch(loadingPagos());
   return axios
-    .get("http://localhost:3000/api/pagos")
+    .get(`${base_url}/pagos/pagos`)
     .then((res) => {
       const items = normalizeData(res.data.result);
       dispatch(getPagosSuccess(items));

@@ -2,8 +2,9 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Section from "~commons/Section";
 import { fetchLotes } from "~redux/LoteDuck";
-import { denormalizeData } from "../../utils/formatters";
+import { denormalizeData, currencyFormat } from "../../utils/formatters";
 import { Link } from "react-router-dom";
+
 
 const Lotes = () => {
   const dispatch = useDispatch();
@@ -39,9 +40,9 @@ const Lotes = () => {
                 <tr key={index}>
                   <td>{lote.numero}</td>
                   <td>{lote.cliente}</td>
-                  <td>{lote.area}</td>
-                  <td>{lote.precio_m2}</td>
-                  <td>{lote.precio_total}</td>
+                  <td>{currencyFormat(lote.area,"",0)}</td>
+                  <td>{currencyFormat(lote.precio_m2, "$", 0)}</td>
+                  <td>{currencyFormat(lote.precio_total, "$", 0)}</td>
                   <td>{lote.status}</td>
                   <td>{lote.descripcion}</td>
                   <td>

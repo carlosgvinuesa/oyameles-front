@@ -3,28 +3,22 @@ import { base_url } from "./variables";
 import { normalizeData } from "../utils/formatters";
 axios.defaults.withCredentials = true;
 
+const LOADING = "oyameles/users/LOADING";
 
-const LOADING = "oyameles/user/LOADING";
+const FETCH_USERS_SUCCESS = "oyameles/users/FETCH_USERS_SUCCESS";
+const FETCH_USERS_ERROR = "oyameles/users/FETCH_USERS_ERROR";
 
-const LOGIN_SUCCESS = "oyameles/user/LOGIN_SUCCESS";
-const LOGIN_ERROR = "oyameles/user/LOGIN_ERROR";
+const CREATE_USER_SUCCESS = "oyameles/users/CREATE_USER_SUCCESS";
+const CREATE_USER_ERROR = "oyameles/users/CREATE_USER_ERROR";
 
-const LOGOUT = "oyameles/user/LOGOUT";
+const EDIT_USER_SUCCESS = "oyameles/users/EDIT_USER_SUCCESS";
+const EDIT_USER_ERROR = "oyameles/users/EDIT_USER_ERROR";
 
-const GET_USERS_SUCCESS = "oyameles/user/GET_USERS_SUCCESS";
-const GET_USERS_ERROR = "oyameles/user/GET_USERS_ERROR";
-
-const CREATE_USER_SUCCESS = "oyameles/user/CREATE_USER_SUCCESS"
-const CREATE_USER_ERROR = "oyameles/user/CREATE_USER_ERROR"
-
-const EDIT_USER_SUCCESS = "oyameles/user/EDIT_USER_SUCCESS"
-const EDIT_USER_ERROR = "oyameles/user/EDIT_USER_ERROR"
-
-const DELETE_USER_SUCCESS = "oyameles/user/DELETE_USER_SUCCESS"
-const DELETE_USER_ERROR = "oyameles/user/DELETE_USER_ERROR"
+const DELETE_USER_SUCCESS = "oyameles/users/DELETE_USER_SUCCESS";
+const DELETE_USER_ERROR = "oyameles/users/DELETE_USER_ERROR";
 
 const initialState = {
-  data: JSON.parse(localStorage.getItem("user")),
+  items: {},
   status: "",
   error: undefined,
 };
@@ -34,33 +28,33 @@ export default function reducer(state = initialState, action) {
     case LOADING:
       return { ...state, status: "pending" };
 
-    case LOGIN_SUCCESS:
-      return { status: "success", data: { ...action.payload } };
-    case LOGIN_ERROR:
-      return { status: "error", error: action.error };
-
-    case LOGOUT:
-      return initialState;
-
-      case GET_USERS_SUCCESS:
-        return { ...state, status: "success", users: { ...action.payload } };
-    case GET_USERS_ERROR:
-        return { ...state, status: "error", error: action.error }
+    case FETCH_USERS_SUCCESS:
+      return { ...state, status: "success", items: { ...action.payload } };
+    case FETCH_USERS_ERROR:
+      return { ...state, status: "error", error: action.error };
 
     case CREATE_USER_SUCCESS:
-        return { ...state, status: "success", users: { ...state.users, [action.payload._id]: action.payload } }
+      return {
+        ...state,
+        status: "success",
+        users: { ...state.users, [action.payload._id]: action.payload },
+      };
     case CREATE_USER_ERROR:
-        return { ...state, status: "error", error: action.error }
+      return { ...state, status: "error", error: action.error };
 
     case EDIT_USER_SUCCESS:
-        return { ...state, status: "success", users: { ...state.users, [action.payload._id]: action.payload } }
+      return {
+        ...state,
+        status: "success",
+        items: { ...state.users, [action.payload._id]: action.payload },
+      };
     case EDIT_USER_ERROR:
-        return { ...state, status: "error", error: action.error }
+      return { ...state, status: "error", error: action.error };
 
     case DELETE_USER_SUCCESS:
-        return { ...state, status: "success" }
+      return { ...state, status: "success" };
     case DELETE_USER_ERROR:
-        return { ...state, status: "error", error: action.error }
+      return { ...state, status: "error", error: action.error };
 
     default:
       return state;
@@ -71,27 +65,13 @@ export const loading = () => ({
   type: LOADING,
 });
 
-export const loginSuccess = (payload) => ({
-  type: LOGIN_SUCCESS,
+export const fetchUsersSuccess = (payload) => ({
+  type: FETCH_USERS_SUCCESS,
   payload,
 });
 
-export const loginError = (error) => ({
-  type: LOGIN_ERROR,
-  error,
-});
-
-export const logoutSuccess = () => ({
-  type: LOGOUT,
-});
-
-export const getUsersSuccess = (payload) => ({
-  type: GET_USERS_SUCCESS,
-  payload,
-});
-
-export const getUsersError = (error) => ({
-  type: GET_USERS_ERROR,
+export const fetchUsersError = (error) => ({
+  type: FETCH_USERS_ERROR,
   error,
 });
 
@@ -127,75 +107,51 @@ export const deleteUserError = (error) => ({
 
 // thunks
 
-export const login = (credential, push) => (dispatch) => {
+export const fetchUsers = () => (dispatch) => {
   dispatch(loading());
   return axios
-    .post(`${base_url}/users/login`, credential)
+    .get(`${base_url}/users`)
     .then((res) => {
-      const user = res.data.user;
-      localStorage.setItem("user", JSON.stringify(user));
-      dispatch(loginSuccess(user));
-      push("/");
+      const users = normalizeData(res.data.result);
+      dispatch(fetchUsersSuccess(users));
     })
-    .catch((res) => dispatch(loginError(res.response.data)));
-};
-
-export const logout = (credential, push) => (dispatch) => {
-  return axios
-    .post(`${base_url}/users/logout`, credential)
-    .then((res) => {
-      const user = res.data.user;
-      localStorage.removeItem("user", JSON.stringify(user));
-      dispatch(logoutSuccess());
-      push("/login");
+    .catch((err) => {
+      dispatch(fetchUsersError(err));
     });
-};
-
-export const getUsers = () => (dispatch) => {
-  dispatch(loading());
-  return axios
-      .get(`${base_url}/users`)
-      .then((res) => {
-          const users = normalizeData(res.data.result);
-          dispatch(getUsersSuccess(users));
-      })
-      .catch((err) => {
-          dispatch(getUsersError(err));
-      })
 };
 
 export const createUser = (data) => (dispatch) => {
   dispatch(loading());
   return axios
-      .post(`${base_url}/users`, data, { headers: { "Content-Type": "multipart/form-data" } })
-      .then((res) => {
-          dispatch(createUserSuccess(res.data.msg));
-      })
-      .catch((err) => {
-          dispatch(createUserError(err));
-      });
+    .post(`${base_url}/users/`, data)
+    .then((res) => {
+      dispatch(createUserSuccess(res.data.msg));
+    })
+    .catch((err) => {
+      dispatch(createUserError(err));
+    });
 };
 
 export const editUser = (params) => (dispatch) => {
   dispatch(loading());
   return axios
-      .patch(`${base_url}/users/${params.id}`, params.data)
-      .then((res) => {
-          dispatch(editUserSuccess(res.data.result));
-      })
-      .catch((err) => {
-          dispatch(editUserError(err));
-      });
+    .patch(`${base_url}/users/${params.id}`, params.data)
+    .then((res) => {
+      dispatch(editUserSuccess(res.data.result));
+    })
+    .catch((err) => {
+      dispatch(editUserError(err));
+    });
 };
 
 export const deleteUser = (id) => (dispatch) => {
   dispatch(loading());
   return axios
-      .delete(`${base_url}/users/${id}`)
-      .then((res) => {
-          dispatch(deleteUserSuccess(res.data.user));
-      })
-      .catch((err) => {
-          dispatch(deleteUserSuccess(err));
-      })
+    .delete(`${base_url}/users/${id}`)
+    .then((res) => {
+      dispatch(deleteUserSuccess(res.data.user));
+    })
+    .catch((err) => {
+      dispatch(deleteUserSuccess(err));
+    });
 };
