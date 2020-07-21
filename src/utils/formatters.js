@@ -22,7 +22,7 @@ export const currencyFormat = (num = 0, symbol = "", decimales = 2) => {
     str[1] = str[1].replace(/(\d{3})/g, `${symbol}1 `);
   }
   let result = str.join(".");
-  result = `${symbol} ${result}`;
+  result = `${symbol}${result}`;
   return result;
 };
 

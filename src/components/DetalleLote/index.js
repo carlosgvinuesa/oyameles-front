@@ -26,10 +26,10 @@ const Ventas = () => {
   // const lote = denormalizeData(lotes).find((x) => x._id === id) || {};
   const venta = denormalizeData(ventas).find((x) => x.lote._id === id) || {};
 
-  console.log(ventas, users);
-
   const detalleCredito = (propiedad) =>
     venta.detalle_credito === undefined ? "" : venta.detalle_credito[propiedad];
+
+  console.log(venta);
 
   useEffect(() => {
     dispatch(fetchVentas());
@@ -140,14 +140,51 @@ const Ventas = () => {
   const handleSelectors = (e) => {
     const key = e.target.name;
     const value = e.target.files || e.target.value;
-    if(key === "cliente") setCliente(denormalizeData(users).find((x) => x.nombre === value));
-    if(key === "vendedor") setVendedor(denormalizeData(users).find((x) => x.nombre === value));
-    console.log("llave", key, "value", value, cliente);
+    if (key === "cliente")
+      setCliente(denormalizeData(users).find((x) => x.nombre === value));
+    if (key === "vendedor")
+      setVendedor(denormalizeData(users).find((x) => x.nombre === value));
   };
 
-  const handleSubmit2 = (e) => {
+  const guardarCambios = (e) => {
     e.preventDefault();
+    let data = {
+      tipo_de_venta: "Credito",
+      vendedor: vendedor._id,
+      fecha: creditoData.fecha_inicial,
+      client: cliente._id,
+      lote: lote._id,
+      comentarios: "",
+      ...creditoData,
+    };
+    if (creditoData["images"]) {
+      data["images"] = creditoData["images"];
+    }
+
+    const formData = new FormData();
+    for (let key in data) {
+      if (key === "images") {
+        for (let file of Array.from(data[key])) {
+          formData.append(key, file);
+        }
+      } else {
+        formData.append(key, data[key]);
+      }
+    }
+
+    if (Object.keys(venta).length === 0) {
+      dispatch(createVenta(formData));
+
+      // 'htpps://'   || {src:'asdasd',seze:12}
+      // if(typeof lote['images'] === 'string'){
+      //   delete lote['images']
+      // }
+      dispatch(editLote({ status: "Vendido" }, lote._id));
+    } else {
+      dispatch(editVenta(formData, venta._id));
+    }
   };
+
   const propiedad = (propiedad) =>
     propiedad === undefined || propiedad.length < 1
       ? "ND"
@@ -254,6 +291,7 @@ const Ventas = () => {
                 <InputField
                   name="fecha_inicial"
                   title="Fecha Inicial"
+                  type="date"
                   placeholder={detalleCredito("fecha_inicial")}
                   value={creditoData["fecha_inicial"] || ""}
                   handleChange={handleChange}
@@ -318,10 +356,7 @@ const Ventas = () => {
           </div>
           <div className="uk-width-1-2 uk-height-match">
             <div className="uk-card uk-card-default uk-card-body">
-              <form
-                className="uk-form-horizontal uk-margin-large"
-                onSubmit={handleSubmit2}
-              >
+              <form className="uk-form-horizontal uk-margin-large">
                 <div className="uk-margin">
                   <label
                     className="uk-form-label"
@@ -376,45 +411,60 @@ const Ventas = () => {
                     Cel: {vendedor.celular || ""}
                   </div>
                 </div>
-                <button className="uk-button">Guardar Cliente</button>
               </form>
             </div>
-            <div className="uk-card uk-card-default uk-card-body">b</div>
+            <div className="uk-card uk-card-default uk-card-body">
+              <h5>Pagos</h5>
+              Total pagado:{" "}
+              {denormalizeData(pagos).length < 1
+                ? ""
+                : currencyFormat(
+                    denormalizeData(pagos).reduce((a, b) => a + b.monto, 0),
+                    "$",
+                    0
+                  )}
+            </div>
           </div>
         </div>
+        <button onClick={guardarCambios} className="uk-button">
+          Guardar Cambios
+        </button>
       </Section>
+
       <Section>
-        <table className="uk-table uk-table-middle uk-table-divider uk-table-striped table uk-table-small uk-table-responsive">
-          <thead>
-            <tr>
-              <th className="uk-width-small">Periodo</th>
-              <th>Fecha de Pago</th>
-              <th>Saldo Inicial</th>
-              <th>Pago Mensual</th>
-              <th>Intereses</th>
-              <th>Principal</th>
-              <th>Saldo Final</th>
-              <th>Interesas Acumulados</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tabla
-              .sort((a, b) => a.periodo - b.periodo)
-              .map((pago, index) => (
-                <tr key={index}>
-                  <td>{pago.periodo}</td>
-                  <td>{pago.fecha}</td>
-                  <td>{currencyFormat(pago.saldo_inicial, "$", 0)}</td>
-                  <td>{currencyFormat(pago.pago_mensual, "$", 0)}</td>
-                  <td>{currencyFormat(pago.intereses, "$", 0)}</td>
-                  <td>{currencyFormat(pago.principal, "$", 0)}</td>
-                  <td>{currencyFormat(pago.saldo_final, "$", 0)}</td>
-                  <td>{currencyFormat(pago.intereses_acumulados, "$", 0)}</td>
-                  <td></td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+        <div className="uk-overflow-auto">
+          <table className="uk-table uk-table-middle uk-table-divider uk-table-striped table uk-table-small">
+            <thead>
+              <tr>
+                <th className="uk-width-small">Periodo</th>
+                <th>Fecha de Pago</th>
+                <th>Saldo Inicial</th>
+                <th>Pago Mensual</th>
+                <th>Intereses</th>
+                <th>Principal</th>
+                <th>Saldo Final</th>
+                <th>Interesas Acumulados</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tabla
+                .sort((a, b) => a.periodo - b.periodo)
+                .map((pago, index) => (
+                  <tr key={index}>
+                    <td>{pago.periodo}</td>
+                    <td>{pago.fecha}</td>
+                    <td>{currencyFormat(pago.saldo_inicial, "$", 0)}</td>
+                    <td>{currencyFormat(pago.pago_mensual, "$", 0)}</td>
+                    <td>{currencyFormat(pago.intereses, "$", 0)}</td>
+                    <td>{currencyFormat(pago.principal, "$", 0)}</td>
+                    <td>{currencyFormat(pago.saldo_final, "$", 0)}</td>
+                    <td>{currencyFormat(pago.intereses_acumulados, "$", 0)}</td>
+                    <td></td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
       </Section>
     </div>
   );

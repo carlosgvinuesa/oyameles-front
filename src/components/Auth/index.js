@@ -27,7 +27,7 @@ const Auth = () => {
     e.preventDefault();
     isLogin
       ? dispatch(login(credentials, push))
-      : dispatch(signup(credentials));
+      : dispatch(signup(credentials, push));
   };
 
   const handleChange = (e) => {
@@ -63,23 +63,6 @@ const Auth = () => {
                         onChange={handleChange}
                         id="nombre"
                         name="nombre"
-                        className="uk-input"
-                        type="text"
-                        required
-                      />
-                    </div>
-                    <label className="uk-form-label" htmlFor="email">
-                      Apellido:
-                    </label>
-                    <div className="uk-inline">
-                      <span
-                        className="uk-form-icon uk-form-icon-flip"
-                        uk-icon=""
-                      ></span>
-                      <input
-                        onChange={handleChange}
-                        id="apellido"
-                        name="apellido"
                         className="uk-input"
                         type="text"
                         required

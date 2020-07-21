@@ -126,7 +126,7 @@ export const fetchVentas = () => (dispatch) => {
     });
 };
 
-export const createVenta = (data, push) => (dispatch) => {
+export const createVenta = (data) => (dispatch) => {
   dispatch(loadingVentas());
   return axios
     .post(`${base_url}/ventas`, data, {
@@ -142,10 +142,10 @@ export const createVenta = (data, push) => (dispatch) => {
     });
 };
 
-export const editVenta = (params) => (dispatch) => {
+export const editVenta = (data, id) => (dispatch) => {
   dispatch(loadingVentas());
   return axios
-    .patch(`${base_url}/ventas/${params.id}`, params.data, {
+    .patch(`${base_url}/ventas/${id}`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

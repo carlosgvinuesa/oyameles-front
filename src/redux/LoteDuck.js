@@ -138,13 +138,27 @@ export const createLote = (data, push) => (dispatch) => {
     })
     .then((res) => {
       dispatch(createLoteSuccess(res.data.result));
+      push("/")
+    })
+    .catch((err) => {
+      dispatch(createLoteError(err));
     });
 };
 
-export const editLote = (params) => (dispatch) => {
+export const editLote = (data, id) => (dispatch) => {
   dispatch(loadingLotes());
+  const formData = new FormData();
+    for (let key in data) {
+      if (key === "images") {
+        for (let file of Array.from(data[key])) {
+          formData.append(key, file);
+        }
+      } else {
+        formData.append(key, data[key]);
+      }
+    }
   return axios
-    .patch(`${base_url}/lotes/${params.id}`, params.data, {
+    .patch(`${base_url}/lotes/${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
