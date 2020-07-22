@@ -52,7 +52,7 @@ const Auth = () => {
                 ) : (
                   <div>
                     <label className="uk-form-label" htmlFor="email">
-                      Nombre:
+                      Nombre Completo:
                     </label>
                     <div className="uk-inline">
                       <span
@@ -66,6 +66,22 @@ const Auth = () => {
                         className="uk-input"
                         type="text"
                         required
+                      />
+                    </div>
+                    <label className="uk-form-label" htmlFor="email">
+                      Cel:
+                    </label>
+                    <div className="uk-inline">
+                      <span
+                        className="uk-form-icon uk-form-icon-flip"
+                        uk-icon=""
+                      ></span>
+                      <input
+                        onChange={handleChange}
+                        id="celular"
+                        name="celular"
+                        className="uk-input"
+                        type="text"
                       />
                     </div>
                   </div>
@@ -87,24 +103,23 @@ const Auth = () => {
                     required
                   />
                 </div>
-                <div className="uk-margin">
-                  <label className="uk-form-label" htmlFor="password">
-                    Password:
-                  </label>
-                  <div className="uk-inline">
-                    <span
-                      className="uk-form-icon uk-form-icon-flip"
-                      uk-icon="icon: lock"
-                    ></span>
-                    <input
-                      onChange={handleChange}
-                      id="password"
-                      name="password"
-                      className="uk-input"
-                      type="password"
-                      required
-                    />
-                  </div>
+
+                <label className="uk-form-label" htmlFor="password">
+                  Password:
+                </label>
+                <div className="uk-inline">
+                  <span
+                    className="uk-form-icon uk-form-icon-flip"
+                    uk-icon="icon: lock"
+                  ></span>
+                  <input
+                    onChange={handleChange}
+                    id="password"
+                    name="password"
+                    className="uk-input"
+                    type="password"
+                    required
+                  />
                 </div>
               </div>
               {isLogin ? (

@@ -9,6 +9,7 @@ import { denormalizeData, currencyFormat } from "../../utils/formatters";
 import { useParams } from "react-router-dom";
 import Slider from "~commons/Slider";
 import InputField from "~commons/form/InputField";
+import TextAreaField from "~commons/form/TextAreaField";
 import * as dayjs from "dayjs";
 
 const Ventas = () => {
@@ -22,6 +23,7 @@ const Ventas = () => {
   const [tabla, setTabla] = useState([]);
   const [cliente, setCliente] = useState({});
   const [vendedor, setVendedor] = useState({});
+  const [nuevoPago, setNuevoPago] = useState({});
 
   // const lote = denormalizeData(lotes).find((x) => x._id === id) || {};
   const venta = denormalizeData(ventas).find((x) => x.lote._id === id) || {};
@@ -230,6 +232,35 @@ const Ventas = () => {
     return pagosArr;
   };
 
+  const submitNuevoPago = (e) => {
+    e.preventDefault();
+    let data = nuevoPago;
+
+    const formData = new FormData();
+    for (let key in data) {
+      if (key === "images") {
+        for (let file of Array.from(data[key])) {
+          formData.append(key, file);
+        }
+      } else {
+        formData.append(key, data[key]);
+      }
+    }
+    dispatch(createPago(formData));
+  };
+
+  const handleNuevoPago = (e) => {
+    const key = e.target.name;
+    let value = e.target.files || e.target.value;
+    setNuevoPago((prevState) => ({
+      ...prevState,
+      [key]: value,
+      venta: venta._id,
+    }));
+  };
+
+  console.log(nuevoPago);
+
   return (
     <div>
       <Section>
@@ -356,62 +387,52 @@ const Ventas = () => {
           </div>
           <div className="uk-width-1-2 uk-height-match">
             <div className="uk-card uk-card-default uk-card-body">
-              <form className="uk-form-horizontal uk-margin-large">
-                <div className="uk-margin">
-                  <label
-                    className="uk-form-label"
-                    htmlFor="form-horizontal-select"
-                  >
-                    Cliente
-                  </label>
-                  <div className="uk-form-controls">
-                    <select
-                      className="uk-select"
-                      id="form-horizontal-select"
-                      name="cliente"
-                      onChange={handleSelectors}
-                    >
-                      <option>
-                        {cliente.nombre || "No hay cliente definido"}
-                      </option>
-                      {denormalizeData(users)
-                        .sort((a, b) => a.periodo - b.periodo)
-                        .map((user, index) => (
-                          <option key={index}>{user.nombre}</option>
-                        ))}
-                    </select>
-                    Email: {cliente.email}
-                    <br></br>
-                    Cel: {cliente.celular || ""}
-                  </div>
-                  <label
-                    className="uk-form-label"
-                    htmlFor="form-horizontal-select"
-                  >
-                    Vendedor
-                  </label>
-                  <div className="uk-form-controls">
-                    <select
-                      className="uk-select"
-                      id="form-horizontal-select"
-                      name="vendedor"
-                      onChange={handleSelectors}
-                    >
-                      <option>
-                        {vendedor.nombre || "No hay vendedor definido"}
-                      </option>
-                      {denormalizeData(users)
-                        .sort((a, b) => a.periodo - b.periodo)
-                        .map((user, index) => (
-                          <option key={index}>{user.nombre}</option>
-                        ))}
-                    </select>
-                    Email: {vendedor.email}
-                    <br></br>
-                    Cel: {vendedor.celular || ""}
-                  </div>
-                </div>
-              </form>
+              <label className="uk-form-label" htmlFor="form-horizontal-select">
+                Cliente
+              </label>
+              <div className="uk-form-controls">
+                <select
+                  className="uk-select"
+                  id="form-horizontal-select"
+                  name="cliente"
+                  onChange={handleSelectors}
+                >
+                  <option>{cliente.nombre || "No hay cliente definido"}</option>
+                  {denormalizeData(users)
+                    .sort((a, b) => a.periodo - b.periodo)
+                    .map((user, index) => (
+                      <option key={index}>{user.nombre}</option>
+                    ))}
+                </select>
+                Email: {cliente.email}
+                <br></br>
+                Cel: {cliente.celular || ""}
+              </div>
+            </div>
+            <div className="uk-card uk-card-default uk-card-body">
+              <label className="uk-form-label" htmlFor="form-horizontal-select">
+                Vendedor
+              </label>
+              <div className="uk-form-controls">
+                <select
+                  className="uk-select"
+                  id="form-horizontal-select"
+                  name="vendedor"
+                  onChange={handleSelectors}
+                >
+                  <option>
+                    {vendedor.nombre || "No hay vendedor definido"}
+                  </option>
+                  {denormalizeData(users)
+                    .sort((a, b) => a.periodo - b.periodo)
+                    .map((user, index) => (
+                      <option key={index}>{user.nombre}</option>
+                    ))}
+                </select>
+                Email: {vendedor.email}
+                <br></br>
+                Cel: {vendedor.celular || ""}
+              </div>
             </div>
             <div className="uk-card uk-card-default uk-card-body">
               <h5>Pagos</h5>
@@ -423,6 +444,91 @@ const Ventas = () => {
                     "$",
                     0
                   )}
+              {/* Modal */}
+              <button
+                className="uk-button uk-button-default uk-margin-small-right"
+                type="button"
+                uk-toggle="target: #nuevo-pago"
+              >
+                Agregar Pago
+              </button>
+              <div id="nuevo-pago" uk-modal="true">
+                <div className="uk-modal-dialog uk-modal-body">
+                  <h2 className="uk-modal-title">Agregar nuevo pago</h2>
+                  <form
+                    className="uk-grid-small"
+                    uk-grid="true"
+                    onSubmit={submitNuevoPago}
+                  >
+                    <InputField
+                      name="numero_de_pago"
+                      type="number"
+                      title="Numero de Pago"
+                      placeholder="Numero de pago"
+                      value={nuevoPago.numero_de_pago || ""}
+                      handleChange={handleNuevoPago}
+                      required
+                    />
+                    <InputField
+                      name="monto"
+                      type="number"
+                      title="Monto"
+                      placeholder="Monto"
+                      value={nuevoPago.monto || ""}
+                      handleChange={handleNuevoPago}
+                      required
+                    />
+                    <InputField
+                      name="fecha"
+                      type="date"
+                      title="fecha"
+                      placeholder="fecha"
+                      value={nuevoPago.fecha || ""}
+                      handleChange={handleNuevoPago}
+                      required
+                    />
+                    <InputField
+                      name="medio_de_pago"
+                      title="Medio de Pago"
+                      placeholder="Medio de Pago"
+                      value={nuevoPago.medio_de_pago || ""}
+                      handleChange={handleNuevoPago}
+                      required
+                    />
+
+                    <TextAreaField
+                      name="comentarios"
+                      title="Comentarios"
+                      placeholder="Agrega comentarios"
+                      value={nuevoPago.comentarios || ""}
+                      handleChange={handleNuevoPago}
+                    />
+                    <InputField
+                      name="images"
+                      title="Comprobante"
+                      placeholder="Comprobante"
+                      type="file"
+                      handleChange={handleNuevoPago}
+                      multiple
+                    />
+                  </form>
+                  <p className="uk-text-right">
+                    <button
+                      className="uk-button uk-button-default uk-modal-close"
+                      type="button"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="uk-button uk-button-primary uk-modal-close"
+                      type="button"
+                      onClick={submitNuevoPago}
+                    >
+                      Crear
+                    </button>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

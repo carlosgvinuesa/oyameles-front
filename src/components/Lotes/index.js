@@ -181,7 +181,7 @@ const Lotes = () => {
               Cancel
             </button>
             <button
-              className="uk-button uk-button-primary"
+              className="uk-button uk-button-primary uk-modal-close"
               type="button"
               onClick={handleSubmit}
             >
