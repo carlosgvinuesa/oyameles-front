@@ -18,14 +18,14 @@ const Ventas = () => {
   const ventas = useSelector((state) => state.ventas.items);
   const pagos = useSelector((state) => state.pagos.items);
   const users = useSelector((state) => state.users.items);
-  const lote = useSelector((state) => state.lotes.items[id]) || {};
+  const lotes = useSelector((state) => state.lotes.items) || {};
   const [creditoData, setCreditoData] = useState({});
   const [tabla, setTabla] = useState([]);
   const [cliente, setCliente] = useState({});
   const [vendedor, setVendedor] = useState({});
   const [nuevoPago, setNuevoPago] = useState({});
 
-  // const lote = denormalizeData(lotes).find((x) => x._id === id) || {};
+  const lote = denormalizeData(lotes).find((x) => x._id === id) || {};
   const venta = denormalizeData(ventas).find((x) => x.lote._id === id) || {};
 
   //Calculos de pagos
@@ -46,8 +46,7 @@ const Ventas = () => {
   const proximoPago = tabla.find(
     (pago) => pago.periodo === Math.max(...pagosHechosNumeros) + 1
   );
-  console.log(ultimoPago);
-  console.log(proximoPago);
+  //Fin calculos de pagos
 
   const detalleCredito = (propiedad) =>
     venta.detalle_credito === undefined ? "" : venta.detalle_credito[propiedad];
@@ -56,7 +55,7 @@ const Ventas = () => {
     dispatch(fetchVentas());
     dispatch(fetchPagos());
     dispatch(fetchUsers());
-    dispatch(fetchLotes(id));
+    dispatch(fetchLotes());
     if (ventas) {
       let pagosProyectados = corridaCredito(
         detalleCredito("pago_mensual"),
@@ -283,7 +282,7 @@ const Ventas = () => {
       <h1>LOTE {lote.numero}</h1>
       <Section>
         <div
-          className="uk-container uk-grid-match uk-child-width-1-3@m"
+          className="uk-container uk-grid-match uk-child-width-1-3@m uk-text-left"
           uk-grid="true"
         >
           <div>
@@ -291,42 +290,52 @@ const Ventas = () => {
           </div>
           <div>
             <p>
-              <b>Fase:</b> {lote.fase}
+              <b>Fase:</b> <br></br>
+              {lote.fase}
             </p>
             <p>
-              <b>Área:</b> {currencyFormat(lote.area, "", 0)} M2
+              <b>Área:</b> <br></br>
+              {currencyFormat(lote.area, "", 0)} M2
             </p>
             <p>
-              <b>Precio por M2:</b> {currencyFormat(lote.precio_m2, "$", 0)}
+              <b>Precio por M2:</b> <br></br>
+              {currencyFormat(lote.precio_m2, "$", 0)}
             </p>
             <p>
-              <b>Precio Total:</b> {currencyFormat(lote.precio_total, "$", 0)}
+              <b>Precio Total:</b> <br></br>
+              {currencyFormat(lote.precio_total, "$", 0)}
             </p>
             <p>
-              <b>Status:</b> {lote.status}
+              <b>Status:</b> <br></br>
+              {lote.status}
             </p>
           </div>
           <div>
             <p>
-              <b>Colindancias:</b> {propiedad(lote.colindancias)}
+              <b>Colindancias:</b> <br></br>
+              {propiedad(lote.colindancias)}
             </p>
             <p>
-              <b>Geometria:</b> {propiedad(lote.geometria)}
+              <b>Geometria:</b> <br></br>
+              {propiedad(lote.geometria)}
             </p>
             <p>
-              <b>Topografia:</b> {propiedad(lote.topografia)}
+              <b>Topografia:</b> <br></br>
+              {propiedad(lote.topografia)}
             </p>
             <p>
-              <b>Vegetación:</b> {propiedad(lote.vegetacion)}
+              <b>Vegetación:</b> <br></br>
+              {propiedad(lote.vegetacion)}
             </p>
             <p>
-              <b>Vista:</b> {propiedad(lote.vista)}
+              <b>Vista:</b> <br></br>
+              {propiedad(lote.vista)}
             </p>
           </div>
         </div>
       </Section>
 
-      <Section>
+      <Section className="uk-padding-remove-bottom">
         <h3>Detalle de venta del LOTE {lote.numero}</h3>
         <div
           className="uk-text-center"
@@ -334,7 +343,8 @@ const Ventas = () => {
           uk-height-match="target: > div > .uk-card"
         >
           <div className="uk-width-1-2">
-            <div className="uk-card uk-card-default uk-card-body uk-flex uk-flex-center uk-child-width-1">
+            <div className="uk-card uk-card-default uk-card-body uk-flex-center">
+              <h5>Datos de Credito</h5>
               <form
                 className="uk-grid-small uk-flex uk-flex-center uk-child-width-1-2"
                 uk-grid="true"
@@ -348,6 +358,7 @@ const Ventas = () => {
                   placeholder={detalleCredito("fecha_inicial")}
                   value={creditoData["fecha_inicial"] || ""}
                   handleChange={handleChange}
+                  required
                 />
                 <InputField
                   type="number"
@@ -356,6 +367,7 @@ const Ventas = () => {
                   placeholder={detalleCredito("enganche_%")}
                   value={creditoData["enganche_%"] || ""}
                   handleChange={handleChange}
+                  required
                 />
                 <InputField
                   name="tasa"
@@ -364,6 +376,7 @@ const Ventas = () => {
                   placeholder={detalleCredito("tasa")}
                   value={creditoData["tasa"] || ""}
                   handleChange={handleChange}
+                  required
                 />
                 <InputField
                   name="años"
@@ -372,38 +385,42 @@ const Ventas = () => {
                   placeholder={detalleCredito("años")}
                   value={creditoData["años"] || ""}
                   handleChange={handleChange}
-                />
-                <InputField
-                  name="images"
-                  title="Product images"
-                  placeholder="Product images"
-                  type="file"
-                  handleChange={handleChange}
-                  multiple
+                  required
                 />
 
-                <div className="uk-text-center" uk-grid="true">
-                  <div className="uk-card uk-child-width-1-2">
+                <div className="uk-text-center uk-display-block">
+                  <div className="uk-card uk-child-width-1-2 uk-display-block">
                     <b>Enganche:</b>{" "}
                     {currencyFormat(creditoData["enganche_$"], "$", 0) || ""}
                   </div>
                   <br></br>
-                  <div className="uk-card uk-child-width-1-2">
+                  <div className="uk-card uk-child-width-1-2 uk-display-block">
                     <b>Principal:</b>{" "}
                     {creditoData["principal"]
                       ? currencyFormat(creditoData["principal"], "$", 0)
                       : ""}
                   </div>
                   <br></br>
-                  <div className="uk-card uk-child-width-1-2">
+                  <div className="uk-card uk-child-width-1-2 uk-display-block">
                     <b>Meses:</b> {creditoData["meses"] || ""}
                   </div>
                   <br></br>
-                  <div className="uk-card uk-child-width-1-2">
+                  <div className="uk-card uk-child-width-1-2 uk-display-block">
                     <b>PAGO MENSUAL:</b>{" "}
                     {currencyFormat(creditoData["pago_mensual"], "$", 0) || ""}
                   </div>
                 </div>
+                <div>
+                  <InputField
+                    name="images"
+                    title="Product images"
+                    placeholder="Product images"
+                    type="file"
+                    handleChange={handleChange}
+                    multiple
+                  />
+                </div>
+
                 <button className="uk-button">Calcular Pagos</button>
               </form>
             </div>
@@ -415,7 +432,7 @@ const Ventas = () => {
                   className="uk-form-label"
                   htmlFor="form-horizontal-select"
                 >
-                  Cliente
+                  <h5>Cliente</h5>
                 </label>
                 <div className="uk-form-controls">
                   <select
@@ -423,6 +440,7 @@ const Ventas = () => {
                     id="form-horizontal-select"
                     name="cliente"
                     onChange={handleSelectors}
+                    required
                   >
                     <option>
                       {cliente.nombre || "No hay cliente definido"}
@@ -443,7 +461,7 @@ const Ventas = () => {
                   className="uk-form-label"
                   htmlFor="form-horizontal-select"
                 >
-                  Vendedor
+                  <h5>Vendedor</h5>
                 </label>
                 <div className="uk-form-controls">
                   <select
@@ -451,6 +469,7 @@ const Ventas = () => {
                     id="form-horizontal-select"
                     name="vendedor"
                     onChange={handleSelectors}
+                    required
                   >
                     <option>
                       {vendedor.nombre || "No hay vendedor definido"}
@@ -468,11 +487,15 @@ const Ventas = () => {
               </div>
               <div className="uk-card uk-card-default uk-card-body">
                 <h5>Pagos</h5>
-                Total pagado:
-                {currencyFormat(totalPagado, "$", 0)}
-                <br></br>
-                Por pagar: {currencyFormat(porPagar, "$", 0)}
-                <br></br>
+                <div className="uk-display-block">
+                  {" "}
+                  <b>Total pagado:</b>
+                  {currencyFormat(totalPagado, "$", 0)}
+                </div>
+
+                <p className="uk-display-block">
+                  <b>Por pagar:</b> {currencyFormat(porPagar, "$", 0)}
+                </p>
                 {/* Empieza el modal de Agregar Pago */}
                 <button
                   className="uk-button uk-button-default uk-margin-small-right"
@@ -489,6 +512,7 @@ const Ventas = () => {
                       uk-grid="true"
                       onSubmit={submitNuevoPago}
                     >
+                      <br></br>
                       <InputField
                         name="numero_de_pago"
                         type="number"
@@ -660,8 +684,8 @@ const Ventas = () => {
         </div>
       </Section>
 
-      <Section>
-        <div className="uk-overflow-auto">
+      <Section className="uk-padding-remove-top">
+        <div className="uk-overflow-auto uk-padding-remove-top">
           <table className="uk-table uk-table-middle uk-table-divider uk-table-striped table uk-table-small">
             <thead>
               <tr>

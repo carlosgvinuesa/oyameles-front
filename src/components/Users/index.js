@@ -60,6 +60,7 @@ const Lotes = () => {
               uk-grid="true"
               onSubmit={handleCreate}
             >
+            <br></br>
               <InputField
                 name="nombre"
                 title="Nombre Completo"
