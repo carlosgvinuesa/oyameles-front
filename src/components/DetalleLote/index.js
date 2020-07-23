@@ -28,10 +28,29 @@ const Ventas = () => {
   // const lote = denormalizeData(lotes).find((x) => x._id === id) || {};
   const venta = denormalizeData(ventas).find((x) => x.lote._id === id) || {};
 
+  //Calculos de pagos
+  const pagosHechos = denormalizeData(pagos).filter(
+    (pago) => pago.venta._id === venta._id
+  );
+  const pagosHechosNumeros = pagosHechos.map((pago) => pago.numero_de_pago);
+
+  const totalPagado =
+    denormalizeData(pagosHechos).length < 1
+      ? ""
+      : denormalizeData(pagosHechos).reduce((a, b) => a + b.monto, 0);
+
+  const porPagar = lote.precio_total - totalPagado;
+  const ultimoPago = pagosHechos.find(
+    (pago) => pago.numero_de_pago === Math.max(...pagosHechosNumeros)
+  );
+  const proximoPago = tabla.find(
+    (pago) => pago.periodo === Math.max(...pagosHechosNumeros) + 1
+  );
+  console.log(ultimoPago);
+  console.log(proximoPago);
+
   const detalleCredito = (propiedad) =>
     venta.detalle_credito === undefined ? "" : venta.detalle_credito[propiedad];
-
-  console.log(venta);
 
   useEffect(() => {
     dispatch(fetchVentas());
@@ -259,12 +278,10 @@ const Ventas = () => {
     }));
   };
 
-  console.log(nuevoPago);
-
   return (
     <div>
+      <h1>LOTE {lote.numero}</h1>
       <Section>
-        <h3>LOTE {lote.numero}</h3>
         <div
           className="uk-container uk-grid-match uk-child-width-1-3@m"
           uk-grid="true"
@@ -311,14 +328,19 @@ const Ventas = () => {
 
       <Section>
         <h3>Detalle de venta del LOTE {lote.numero}</h3>
-        <div className="uk-text-center" uk-grid="true">
+        <div
+          className="uk-text-center"
+          uk-grid="true"
+          uk-height-match="target: > div > .uk-card"
+        >
           <div className="uk-width-1-2">
             <div className="uk-card uk-card-default uk-card-body uk-flex uk-flex-center uk-child-width-1">
               <form
-                className="uk-grid-small"
+                className="uk-grid-small uk-flex uk-flex-center uk-child-width-1-2"
                 uk-grid="true"
                 onSubmit={handleSubmit}
               >
+                <br></br>
                 <InputField
                   name="fecha_inicial"
                   title="Fecha Inicial"
@@ -351,6 +373,15 @@ const Ventas = () => {
                   value={creditoData["años"] || ""}
                   handleChange={handleChange}
                 />
+                <InputField
+                  name="images"
+                  title="Product images"
+                  placeholder="Product images"
+                  type="file"
+                  handleChange={handleChange}
+                  multiple
+                />
+
                 <div className="uk-text-center" uk-grid="true">
                   <div className="uk-card uk-child-width-1-2">
                     <b>Enganche:</b>{" "}
@@ -373,168 +404,260 @@ const Ventas = () => {
                     {currencyFormat(creditoData["pago_mensual"], "$", 0) || ""}
                   </div>
                 </div>
-                <InputField
-                  name="images"
-                  title="Product images"
-                  placeholder="Product images"
-                  type="file"
-                  handleChange={handleChange}
-                  multiple
-                />
                 <button className="uk-button">Calcular Pagos</button>
               </form>
             </div>
           </div>
           <div className="uk-width-1-2 uk-height-match">
             <div className="uk-card uk-card-default uk-card-body">
-              <label className="uk-form-label" htmlFor="form-horizontal-select">
-                Cliente
-              </label>
-              <div className="uk-form-controls">
-                <select
-                  className="uk-select"
-                  id="form-horizontal-select"
-                  name="cliente"
-                  onChange={handleSelectors}
+              <div className="uk-card uk-card-default uk-card-body">
+                <label
+                  className="uk-form-label"
+                  htmlFor="form-horizontal-select"
                 >
-                  <option>{cliente.nombre || "No hay cliente definido"}</option>
-                  {denormalizeData(users)
-                    .sort((a, b) => a.periodo - b.periodo)
-                    .map((user, index) => (
-                      <option key={index}>{user.nombre}</option>
-                    ))}
-                </select>
-                Email: {cliente.email}
-                <br></br>
-                Cel: {cliente.celular || ""}
-              </div>
-            </div>
-            <div className="uk-card uk-card-default uk-card-body">
-              <label className="uk-form-label" htmlFor="form-horizontal-select">
-                Vendedor
-              </label>
-              <div className="uk-form-controls">
-                <select
-                  className="uk-select"
-                  id="form-horizontal-select"
-                  name="vendedor"
-                  onChange={handleSelectors}
-                >
-                  <option>
-                    {vendedor.nombre || "No hay vendedor definido"}
-                  </option>
-                  {denormalizeData(users)
-                    .sort((a, b) => a.periodo - b.periodo)
-                    .map((user, index) => (
-                      <option key={index}>{user.nombre}</option>
-                    ))}
-                </select>
-                Email: {vendedor.email}
-                <br></br>
-                Cel: {vendedor.celular || ""}
-              </div>
-            </div>
-            <div className="uk-card uk-card-default uk-card-body">
-              <h5>Pagos</h5>
-              Total pagado:{" "}
-              {denormalizeData(pagos).length < 1
-                ? ""
-                : currencyFormat(
-                    denormalizeData(pagos).reduce((a, b) => a + b.monto, 0),
-                    "$",
-                    0
-                  )}
-              {/* Modal */}
-              <button
-                className="uk-button uk-button-default uk-margin-small-right"
-                type="button"
-                uk-toggle="target: #nuevo-pago"
-              >
-                Agregar Pago
-              </button>
-              <div id="nuevo-pago" uk-modal="true">
-                <div className="uk-modal-dialog uk-modal-body">
-                  <h2 className="uk-modal-title">Agregar nuevo pago</h2>
-                  <form
-                    className="uk-grid-small"
-                    uk-grid="true"
-                    onSubmit={submitNuevoPago}
+                  Cliente
+                </label>
+                <div className="uk-form-controls">
+                  <select
+                    className="uk-select"
+                    id="form-horizontal-select"
+                    name="cliente"
+                    onChange={handleSelectors}
                   >
-                    <InputField
-                      name="numero_de_pago"
-                      type="number"
-                      title="Numero de Pago"
-                      placeholder="Numero de pago"
-                      value={nuevoPago.numero_de_pago || ""}
-                      handleChange={handleNuevoPago}
-                      required
-                    />
-                    <InputField
-                      name="monto"
-                      type="number"
-                      title="Monto"
-                      placeholder="Monto"
-                      value={nuevoPago.monto || ""}
-                      handleChange={handleNuevoPago}
-                      required
-                    />
-                    <InputField
-                      name="fecha"
-                      type="date"
-                      title="fecha"
-                      placeholder="fecha"
-                      value={nuevoPago.fecha || ""}
-                      handleChange={handleNuevoPago}
-                      required
-                    />
-                    <InputField
-                      name="medio_de_pago"
-                      title="Medio de Pago"
-                      placeholder="Medio de Pago"
-                      value={nuevoPago.medio_de_pago || ""}
-                      handleChange={handleNuevoPago}
-                      required
-                    />
-
-                    <TextAreaField
-                      name="comentarios"
-                      title="Comentarios"
-                      placeholder="Agrega comentarios"
-                      value={nuevoPago.comentarios || ""}
-                      handleChange={handleNuevoPago}
-                    />
-                    <InputField
-                      name="images"
-                      title="Comprobante"
-                      placeholder="Comprobante"
-                      type="file"
-                      handleChange={handleNuevoPago}
-                      multiple
-                    />
-                  </form>
-                  <p className="uk-text-right">
-                    <button
-                      className="uk-button uk-button-default uk-modal-close"
-                      type="button"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="uk-button uk-button-primary uk-modal-close"
-                      type="button"
-                      onClick={submitNuevoPago}
-                    >
-                      Crear
-                    </button>
-                  </p>
+                    <option>
+                      {cliente.nombre || "No hay cliente definido"}
+                    </option>
+                    {denormalizeData(users)
+                      .sort((a, b) => a.periodo - b.periodo)
+                      .map((user, index) => (
+                        <option key={index}>{user.nombre}</option>
+                      ))}
+                  </select>
+                  Email: {cliente.email}
+                  <br></br>
+                  Cel: {cliente.celular || ""}
                 </div>
+              </div>
+              <div className="uk-card uk-card-default uk-card-body">
+                <label
+                  className="uk-form-label"
+                  htmlFor="form-horizontal-select"
+                >
+                  Vendedor
+                </label>
+                <div className="uk-form-controls">
+                  <select
+                    className="uk-select"
+                    id="form-horizontal-select"
+                    name="vendedor"
+                    onChange={handleSelectors}
+                  >
+                    <option>
+                      {vendedor.nombre || "No hay vendedor definido"}
+                    </option>
+                    {denormalizeData(users)
+                      .sort((a, b) => a.periodo - b.periodo)
+                      .map((user, index) => (
+                        <option key={index}>{user.nombre}</option>
+                      ))}
+                  </select>
+                  Email: {vendedor.email}
+                  <br></br>
+                  Cel: {vendedor.celular || ""}
+                </div>
+              </div>
+              <div className="uk-card uk-card-default uk-card-body">
+                <h5>Pagos</h5>
+                Total pagado:
+                {currencyFormat(totalPagado, "$", 0)}
+                <br></br>
+                Por pagar: {currencyFormat(porPagar, "$", 0)}
+                <br></br>
+                {/* Empieza el modal de Agregar Pago */}
+                <button
+                  className="uk-button uk-button-default uk-margin-small-right"
+                  type="button"
+                  uk-toggle="target: #nuevo-pago"
+                >
+                  Agregar Pago
+                </button>
+                <div id="nuevo-pago" uk-modal="true">
+                  <div className="uk-modal-dialog uk-modal-body">
+                    <h2 className="uk-modal-title">Agregar nuevo pago</h2>
+                    <form
+                      className="uk-grid-small"
+                      uk-grid="true"
+                      onSubmit={submitNuevoPago}
+                    >
+                      <InputField
+                        name="numero_de_pago"
+                        type="number"
+                        title="Numero de Pago"
+                        placeholder="Numero de pago"
+                        value={nuevoPago.numero_de_pago || ""}
+                        handleChange={handleNuevoPago}
+                        required
+                      />
+                      <InputField
+                        name="monto"
+                        type="number"
+                        title="Monto"
+                        placeholder="Monto"
+                        value={nuevoPago.monto || ""}
+                        handleChange={handleNuevoPago}
+                        required
+                      />
+                      <InputField
+                        name="fecha"
+                        type="date"
+                        title="fecha"
+                        placeholder="fecha"
+                        value={nuevoPago.fecha || ""}
+                        handleChange={handleNuevoPago}
+                        required
+                      />
+                      <InputField
+                        name="medio_de_pago"
+                        title="Medio de Pago"
+                        placeholder="Medio de Pago"
+                        value={nuevoPago.medio_de_pago || ""}
+                        handleChange={handleNuevoPago}
+                        required
+                      />
+
+                      <TextAreaField
+                        name="comentarios"
+                        title="Comentarios"
+                        placeholder="Agrega comentarios"
+                        value={nuevoPago.comentarios || ""}
+                        handleChange={handleNuevoPago}
+                      />
+                      <InputField
+                        id="comprobante"
+                        name="images"
+                        title="Comprobante"
+                        placeholder="Comprobante"
+                        type="file"
+                        handleChange={handleNuevoPago}
+                        multiple
+                      />
+                    </form>
+                    <p className="uk-text-right">
+                      <button
+                        className="uk-button uk-button-default uk-modal-close"
+                        type="button"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        className="uk-button uk-button-primary uk-modal-close"
+                        type="button"
+                        onClick={submitNuevoPago}
+                      >
+                        Crear
+                      </button>
+                    </p>
+                  </div>
+                </div>
+                {/* Fin de modal de Agregar Pago */}
+                {/* Empieza el modal de Detalle de Pagos */}
+                <button
+                  className="uk-button uk-button-default uk-margin-small-right"
+                  type="button"
+                  uk-toggle="target: #ver-pagos"
+                >
+                  Ver Pagos
+                </button>
+                <div id="ver-pagos" uk-modal="true">
+                  <div className="uk-modal-dialog uk-modal-body">
+                    <h2 className="uk-modal-title">Lista de pagos</h2>
+                    Ultimo pago :
+                    {ultimoPago === undefined ? (
+                      ""
+                    ) : (
+                      <div className="uk-card uk-card-default uk-card-body">
+                        Pago: {ultimoPago.numero_de_pago}
+                        <br></br>
+                        Fecha: {dayjs(ultimoPago.fecha).format("DD/MMM/YYYY")}
+                        <br></br>
+                        Monto: {currencyFormat(ultimoPago.monto, "$", 0)}
+                      </div>
+                    )}
+                    Proximo pago :
+                    {proximoPago === undefined ? (
+                      ""
+                    ) : (
+                      <div className="uk-card uk-card-default uk-card-body">
+                        Pago: {proximoPago.periodo}
+                        <br></br>
+                        Fecha: {dayjs(proximoPago.fecha).format("DD/MMM/YYYY")}
+                        <br></br>
+                        Monto:{" "}
+                        {currencyFormat(proximoPago.pago_mensual, "$", 0)}
+                      </div>
+                    )}
+                    Todos los pagos hechos :
+                    {pagosHechos
+                      .sort((a, b) => a.numero_de_pago - b.numero_de_pago)
+                      .map((pago, index) => (
+                        <div
+                          key={index}
+                          className="uk-card uk-card-default uk-card-body"
+                        >
+                          Pago: {pago.numero_de_pago}
+                          <br></br>
+                          Fecha: {dayjs(pago.fecha).format("DD/MMM/YYYY")}
+                          <br></br>
+                          Monto: {currencyFormat(pago.monto, "$", 0)}
+                        </div>
+                      ))}
+                    <p className="uk-text-right">
+                      <button
+                        className="uk-button uk-button-default uk-modal-close"
+                        type="button"
+                      >
+                        Cerrar
+                      </button>
+                    </p>
+                  </div>
+                </div>
+                {/* Fin de modal de detalle de pagos */}
               </div>
             </div>
           </div>
+          <div className="uk-margin">
+            {/* Inicia modal de guardar cambios */}
+            <button
+              className="uk-button uk-button-default uk-margin-small-right"
+              type="button"
+              uk-toggle="target: #guardar-cambios"
+            >
+              Guardar Cambios
+            </button>
+            <div id="guardar-cambios" uk-modal="true">
+              <div className="uk-modal-dialog uk-modal-body">
+                <h2 className="uk-modal-title">Guardar Cambios</h2>
+                <p>Estas seguro de que quieres guardar los cambios?</p>
+                <p className="uk-text-right">
+                  <button
+                    className="uk-button uk-button-default uk-modal-close"
+                    type="button"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="uk-button uk-button-primary uk-modal-close"
+                    type="button"
+                    onClick={guardarCambios}
+                  >
+                    Confirmar
+                  </button>
+                </p>
+              </div>
+            </div>
+            {/* Termina modal de guardar cambios */}
+          </div>
         </div>
-        <button onClick={guardarCambios} className="uk-button">
-          Guardar Cambios
-        </button>
       </Section>
 
       <Section>
@@ -556,7 +679,16 @@ const Ventas = () => {
               {tabla
                 .sort((a, b) => a.periodo - b.periodo)
                 .map((pago, index) => (
-                  <tr key={index}>
+                  <tr
+                    key={index}
+                    style={
+                      pagosHechos
+                        .map((pago) => pago.numero_de_pago)
+                        .includes(pago.periodo)
+                        ? { backgroundColor: "#bee6c2" }
+                        : {}
+                    }
+                  >
                     <td>{pago.periodo}</td>
                     <td>{pago.fecha}</td>
                     <td>{currencyFormat(pago.saldo_inicial, "$", 0)}</td>

@@ -3,25 +3,23 @@ import { useDispatch, useSelector } from "react-redux";
 import Section from "~commons/Section";
 import InputField from "~commons/form/InputField";
 import TextAreaField from "~commons/form/TextAreaField";
-import { fetchLotes, createLote } from "~redux/LoteDuck";
+import { fetchUsers, createUser } from "~redux/UserDuck";
 import { fetchVentas } from "~redux/VentaDuck";
 import { denormalizeData, currencyFormat } from "../../utils/formatters";
 import { Link } from "react-router-dom";
-import Slider from "~commons/Slider";
 
 const Lotes = () => {
   const dispatch = useDispatch();
   const lotes = useSelector((state) => state.lotes.items);
-  const [nuevoLote, setNuevoLote] = useState({});
+  const [nuevoUser, setNuevoUser] = useState({});
 
   useEffect(() => {
-    dispatch(fetchLotes());
-    dispatch(fetchVentas());
+    dispatch(fetchUsers());
   }, [dispatch]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let data = nuevoLote;
+    let data = nuevoUser;
 
     const formData = new FormData();
     for (let key in data) {
@@ -33,85 +31,43 @@ const Lotes = () => {
         formData.append(key, data[key]);
       }
     }
-    dispatch(createLote(formData));
+    dispatch(createUser(formData));
   };
 
   const handleChange = (e) => {
     const key = e.target.name;
     let value = e.target.files || e.target.value;
-    let precio_total = 0;
-    if (nuevoLote.area > 0 && nuevoLote.precio_m2 > 0) {
-      precio_total = nuevoLote.area * nuevoLote.precio_m2;
-    }
-    if (
-      [
-        "vista",
-        "topografia",
-        "vegetacion",
-        "orientacion",
-        "colindancias",
-        "geometria",
-      ].indexOf(key) > -1
-    )
-      value = value.split(",");
-    setNuevoLote((prevState) => ({
+    
+    setNuevoUser((prevState) => ({
       ...prevState,
       [key]: value,
-      precio_total: precio_total,
     }));
   };
 
-  console.log(nuevoLote);
-
   return (
     <div>
-      <section>
-        <div
-          className="uk-child-width-1@s uk-child-width-1-2@m uk-child-width-1-2@l uk-text-center"
-          uk-grid="masonry: true"
-        >
-          <div>
-            <div className="uk-card uk-card-default uk-margin-top">
-              <Slider
-                images={[
-                  "https://res.cloudinary.com/dwgevym2s/image/upload/v1595465392/oyameles/Screen_Shot_2020-07-22_at_19.43.56_ynmwpl.png",
-                ]}
-              />
-            </div>
-          </div>
-          <div>
-            <div className="uk-card uk-card-default uk-margin-top">
-              <Slider
-                images={[
-                  "https://res.cloudinary.com/dwgevym2s/image/upload/v1595465382/oyameles/oyameles9_vkhhs0.png",
-                ]}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
       <Section>
         {/* Modal */}
         <button
           className="uk-button uk-button-default uk-margin-small-right "
           type="button"
-          uk-toggle="target: #nuevo-lote"
+          uk-toggle="target: #nuevo-user"
         >
-          Nuevo Lote
+          Nuevo Usuario
         </button>
-        <div id="nuevo-lote" uk-modal="true">
+        <div id="nuevo-user" uk-modal="true">
           <div className="uk-modal-dialog uk-modal-body">
-            <h2 className="uk-modal-title">Crear nuevo lote</h2>
+            <h2 className="uk-modal-title">Crear nuevo usuario</h2>
             <form
               className="uk-grid-small"
               uk-grid="true"
               onSubmit={handleSubmit}
             >
               <InputField
-                name="numero"
-                title="Numero de Lote"
-                placeholder="Numero de lote"
-                value={nuevoLote.numero || ""}
+                name="nombre"
+                title="Nombre Completo"
+                placeholder="Nombre y apellidos"
+                value={nuevoUser.nombre || ""}
                 handleChange={handleChange}
                 required
               />
@@ -120,7 +76,7 @@ const Lotes = () => {
                 name="fase"
                 title="Fase del Proyecto"
                 placeholder="Fase del Proyecto"
-                value={nuevoLote.fase || ""}
+                value={nuevoUser.fase || ""}
                 handleChange={handleChange}
                 required
               />
@@ -129,7 +85,7 @@ const Lotes = () => {
                 type="number"
                 title="Area en M2"
                 placeholder="Area en M2"
-                value={nuevoLote.area || ""}
+                value={nuevoUser.area || ""}
                 handleChange={handleChange}
                 required
               />
