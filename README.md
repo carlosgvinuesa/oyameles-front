@@ -1,68 +1,32 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+***Oyameles Manager
 
-## Available Scripts
+**El Proyecto Oyameles:
 
-In the project directory, you can run:
+OYAMELES es un desarrollo en el bosque ubicado en el municipio de Ocuilan, Estado de México que tiene como misión regenerar el espacio en el que se encuentra y contribuir a la transformación del desarrollo inmobiliario mediante un modelo basado en prácticas regenerativas y sistemas colaborativos. La intención es crear un cambio de conciencia en las formas en que habitamos, consumimos y nos relacionamos, por medio de actividades recreativas, culturales, educativas, ecoturísticas y espirituales, que generen una cultura de prosperidad compartida. OYAMELES busca convertirse en un centro de intercambio de experiencias para compartir y difundir prácticas que logren generar una relación de unidad con la naturaleza, construir una comunidad sostenible e inspirar a futuras generaciones.
 
-### `yarn start`
+**La Plataforma:
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+La plataforma tiene como objetivo facilitar la administración de este proyecto en todas sus fases. 
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+En este momento se encuntra desarrollada la fase 1:
+    fase 1: administración de la venta de lotes. Llevar un registro de lotes vendidos, pagos recibidos, pagos pendientes, clientes, vendedores, etc.
+    fase 2: administración de reservas del Hotel Oyameles.
+    fase 3: administración de los eventos realizados en el proyecto.
+    fase 4: administración general.
+    fase 5: replicar en otros proyectos.
+    
+*Lo que vas a ver:
 
-### `yarn test`
+Home (Oyameles) - informacion del proyecto
+Lotes - lista de todos los lotes con sus caracteristicas y su estado (vendido/disponible)
+    Detalle Lote - cuando haces click en un lote entras al detalle del lote y de la venta:
+        - Si no esta vendido puedes hacer un calculo del credito y rellenera la informacion del cliente, vendedor (los dos tienen que estar registrados como                    ususarios de la plataforma).
+        - Si si esta vendido puedes revisar los datos, ver los pagos y registrar pagos que se vayan haciendo.
+Users - es la lista de todos los usuarios, admins, clientes y vendedores.
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+*Un usuario para la demo admin es:
 
-### `yarn build`
+user: jueces@gmail.com
+password: demo
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
