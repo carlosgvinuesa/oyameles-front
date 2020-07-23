@@ -27,6 +27,9 @@ const Navbar = () => {
           <li>
             <Link to="/lotes">Lotes</Link>
           </li>
+          <li>
+            <Link to="/users">Users</Link>
+          </li>
         </ul>
       </div>
       <div className="uk-navbar-right">

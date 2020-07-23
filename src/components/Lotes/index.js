@@ -67,7 +67,7 @@ const Lotes = () => {
     <div>
       <section>
         <div
-          className="uk-child-width-1@s uk-child-width-1-2@m uk-child-width-1-2@l uk-text-center"
+          className="uk-child-width-1@s uk-child-width-1-2@m uk-child-width-1-3@l uk-text-center uk-flex uk-flex-center"
           uk-grid="masonry: true"
         >
           <div>

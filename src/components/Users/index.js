@@ -3,46 +3,44 @@ import { useDispatch, useSelector } from "react-redux";
 import Section from "~commons/Section";
 import InputField from "~commons/form/InputField";
 import TextAreaField from "~commons/form/TextAreaField";
-import { fetchUsers, createUser } from "~redux/UserDuck";
-import { fetchVentas } from "~redux/VentaDuck";
-import { denormalizeData, currencyFormat } from "../../utils/formatters";
+import { fetchUsers, createUser, editUser } from "~redux/UserDuck";
+import { denormalizeData } from "../../utils/formatters";
 import { Link } from "react-router-dom";
 
 const Lotes = () => {
   const dispatch = useDispatch();
-  const lotes = useSelector((state) => state.lotes.items);
+  const users = useSelector((state) => state.users.items);
   const [nuevoUser, setNuevoUser] = useState({});
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
-  const handleSubmit = (e) => {
+  const handleCreate = (e) => {
     e.preventDefault();
     let data = nuevoUser;
-
-    const formData = new FormData();
-    for (let key in data) {
-      if (key === "images") {
-        for (let file of Array.from(data[key])) {
-          formData.append(key, file);
-        }
-      } else {
-        formData.append(key, data[key]);
-      }
-    }
-    dispatch(createUser(formData));
+    dispatch(createUser(data));
+  };
+  const handleEdit = (e) => {
+    e.preventDefault();
+    let data = nuevoUser;
+    dispatch(editUser(data));
   };
 
   const handleChange = (e) => {
     const key = e.target.name;
     let value = e.target.files || e.target.value;
-    
     setNuevoUser((prevState) => ({
       ...prevState,
       [key]: value,
     }));
   };
+
+  const llenarData = (e) => {
+    console.log(e.target);
+    // setNuevoUser(denormalizeData(users).find(x=>x._id === user._id))
+  };
+  console.log(nuevoUser);
 
   return (
     <div>
@@ -61,7 +59,7 @@ const Lotes = () => {
             <form
               className="uk-grid-small"
               uk-grid="true"
-              onSubmit={handleSubmit}
+              onSubmit={handleCreate}
             >
               <InputField
                 name="nombre"
@@ -72,88 +70,42 @@ const Lotes = () => {
                 required
               />
               <InputField
-                type="number"
-                name="fase"
-                title="Fase del Proyecto"
-                placeholder="Fase del Proyecto"
-                value={nuevoUser.fase || ""}
+                name="email"
+                title="Email"
+                placeholder="email"
+                value={nuevoUser.email || ""}
                 handleChange={handleChange}
                 required
               />
               <InputField
-                name="area"
-                type="number"
-                title="Area en M2"
-                placeholder="Area en M2"
-                value={nuevoUser.area || ""}
+                name="celular"
+                title="Cel"
+                placeholder="Cel (10 digitos)"
+                value={nuevoUser.celular || ""}
                 handleChange={handleChange}
                 required
               />
               <InputField
-                name="precio_m2"
-                title="Precio por m2"
-                type="number"
-                placeholder="Precio por m2"
-                value={nuevoLote.precio_m2 || ""}
+                name="password"
+                title="Password"
+                placeholder="Password"
+                value={nuevoUser.password || ""}
                 handleChange={handleChange}
                 required
               />
               <InputField
-                name="vista"
-                title="Vista"
-                placeholder="Vista (separa por comas)"
-                value={nuevoLote.vista || ""}
-                handleChange={handleChange}
-              />
-              <InputField
-                name="topografia"
-                title="Topografía"
-                placeholder="Topografía (separa por comas)"
-                value={nuevoLote.topografia || ""}
-                handleChange={handleChange}
-              />
-              <InputField
-                name="vegetacion"
-                title="Vegetación"
-                placeholder="Vegetación (separa por comas)"
-                value={nuevoLote.vegetacion || ""}
-                handleChange={handleChange}
-              />
-              <InputField
-                name="orientacion"
-                title="Orientación"
-                placeholder="Orientación (separa por comas)"
-                value={nuevoLote.orientacion || ""}
-                handleChange={handleChange}
-              />
-              <InputField
-                name="colindancias"
-                title="Colindancias"
-                placeholder="Colindancias (separa por comas)"
-                value={nuevoLote.colindancias || ""}
-                handleChange={handleChange}
-              />
-              <InputField
-                name="geometria"
-                title="Geometría"
-                placeholder="Geometría (separa por comas)"
-                value={nuevoLote.geometria || ""}
+                name="rol"
+                title="Rol"
+                placeholder="Admin, Cliente, Vendedor"
+                value={nuevoUser.vista || ""}
                 handleChange={handleChange}
               />
               <TextAreaField
-                name="descripcion"
-                title="Descripción"
-                placeholder="Agrega una breve descripción"
-                value={nuevoLote.descripcion || ""}
+                name="comentarios"
+                title="Comentarios"
+                placeholder="Agrega comentarios"
+                value={nuevoUser.comentarios || ""}
                 handleChange={handleChange}
-              />
-              <InputField
-                name="images"
-                title="Lote images"
-                placeholder="Lote images"
-                type="file"
-                handleChange={handleChange}
-                multiple
               />
             </form>
             <p className="uk-text-right">
@@ -166,7 +118,7 @@ const Lotes = () => {
               <button
                 className="uk-button uk-button-primary uk-modal-close"
                 type="button"
-                onClick={handleSubmit}
+                onClick={handleCreate}
               >
                 Crear
               </button>
@@ -180,43 +132,108 @@ const Lotes = () => {
             <table className="uk-table uk-table-middle uk-table-divider">
               <thead>
                 <tr>
-                  <th className="uk-width-small">Numero</th>
-                  <th>Fase</th>
-                  <th>Status</th>
-                  <th>Area(m2)</th>
-                  <th>$/m2</th>
-                  <th>Precio Total</th>
-                  <th>Vista</th>
-                  <th>Orientacion</th>
-                  <th>Colindancias</th>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Celular(m2)</th>
+                  <th>Rol</th>
+                  <th>Comentarios</th>
+                  <th>Editar</th>
                 </tr>
               </thead>
               <tbody>
-                {denormalizeData(lotes)
-                  .sort((a, b) => a.numero - b.numero)
-                  .map((lote, index) => (
-                    <tr key={index}>
-                      <td>{lote.numero}</td>
-                      <td>{lote.fase}</td>
-                      <td>{lote.status}</td>
-                      <td>{currencyFormat(lote.area, "", 0)}</td>
-                      <td>{currencyFormat(lote.precio_m2, "$", 0)}</td>
-                      <td>{currencyFormat(lote.precio_total, "$", 0)}</td>
-                      <td>{lote.vista}</td>
-                      <td>{lote.orientacion}</td>
-                      <td>{lote.colindancias}</td>
-                      <td>
-                        <Link to={`/DetalleLote/${lote._id}`}>
-                          <button
-                            className="uk-button uk-button-default"
-                            type="button"
+                {denormalizeData(users).map((user, index) => (
+                  <tr key={index}>
+                    <td>{user.nombre}</td>
+                    <td>{user.email}</td>
+                    <td>{user.celular}</td>
+                    <td>{user.rol}</td>
+                    <td>{user.comentarios}</td>
+                    <td>
+                      {/* Modal */}
+                      <button
+                        className="uk-button uk-button-default uk-margin-small-right "
+                        type="button"
+                        uk-toggle="target: #edit-user"
+                        onClick={llenarData}
+                        disabled
+                      >
+                        Editar
+                      </button>
+                      <div id="edit-user" uk-modal="true">
+                        <div className="uk-modal-dialog uk-modal-body">
+                          <h2 className="uk-modal-title">Editar Usuario</h2>
+                          <form
+                            className="uk-grid-small"
+                            uk-grid="true"
+                            onSubmit={handleEdit}
                           >
-                            Detalle
-                          </button>
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                            <InputField
+                              name="nombre"
+                              title="Nombre Completo"
+                              placeholder="Nombre y apellidos"
+                              value={user.nombre || ""}
+                              handleChange={handleChange}
+                              required
+                            />
+                            <InputField
+                              name="email"
+                              title="Email"
+                              placeholder="email"
+                              value={user.email || ""}
+                              handleChange={handleChange}
+                              required
+                            />
+                            <InputField
+                              name="celular"
+                              title="Cel"
+                              placeholder="Cel (10 digitos)"
+                              value={user.celular || ""}
+                              handleChange={handleChange}
+                              required
+                            />
+                            <InputField
+                              name="password"
+                              title="Password"
+                              placeholder="Password"
+                              value={user.password || ""}
+                              handleChange={handleChange}
+                              required
+                            />
+                            <InputField
+                              name="rol"
+                              title="Rol"
+                              placeholder="Admin, Cliente, Vendedor"
+                              value={user.vista || ""}
+                              handleChange={handleChange}
+                            />
+                            <TextAreaField
+                              name="comentarios"
+                              title="Comentarios"
+                              placeholder="Agrega comentarios"
+                              value={user.comentarios || ""}
+                              handleChange={handleChange}
+                            />
+                          </form>
+                          <p className="uk-text-right">
+                            <button
+                              className="uk-button uk-button-default uk-modal-close"
+                              type="button"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              className="uk-button uk-button-primary uk-modal-close"
+                              type="button"
+                              onClick={handleEdit}
+                            >
+                              Crear
+                            </button>
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
