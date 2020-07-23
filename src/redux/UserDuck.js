@@ -123,7 +123,7 @@ export const fetchUsers = () => (dispatch) => {
 export const createUser = (data) => (dispatch) => {
   dispatch(loading());
   return axios
-    .post(`${base_url}/users/`, data)
+    .post(`${base_url}/users/signup`, data)
     .then((res) => {
       dispatch(createUserSuccess(res.data.msg));
     })

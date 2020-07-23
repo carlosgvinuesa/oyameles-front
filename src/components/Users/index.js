@@ -37,7 +37,6 @@ const Lotes = () => {
   };
 
   const llenarData = (e) => {
-    console.log(e.target);
     // setNuevoUser(denormalizeData(users).find(x=>x._id === user._id))
   };
   console.log(nuevoUser);
@@ -97,7 +96,7 @@ const Lotes = () => {
                 name="rol"
                 title="Rol"
                 placeholder="Admin, Cliente, Vendedor"
-                value={nuevoUser.vista || ""}
+                value={nuevoUser.rol || ""}
                 handleChange={handleChange}
               />
               <TextAreaField
