@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "~redux/AuthDuck";
 import { useHistory } from "react-router-dom";
-import "./NavBar.css"
+import "./NavBar.css";
 
 const Navbar = () => {
   const user = useSelector((state) => state.user.data);
@@ -15,21 +15,22 @@ const Navbar = () => {
     dispatch(logout(credentials, push));
   };
   return (
-    <nav
-      className="bgcol"
-      uk-navbar="true"
-    >
+    <nav className="bgcol" uk-navbar="true">
       <div className="uk-navbar-left">
         <ul className="uk-navbar-nav">
           <li className="uk-active">
             <Link to="/">Oyameles</Link>
           </li>
-          <li>
-            <Link to="/lotes">Lotes</Link>
-          </li>
-          <li>
-            <Link to="/users">Users</Link>
-          </li>
+          {user && user.rol === "Admin" ? (
+            <li>
+              <Link to="/lotes">Lotes</Link>
+            </li>
+          ) : null}
+          {user && user.rol === "Admin" ? (
+            <li>
+              <Link to="/users">Users</Link>
+            </li>
+          ) : null}
         </ul>
       </div>
       <div className="uk-navbar-right">
@@ -46,9 +47,7 @@ const Navbar = () => {
           )}
           {user && (
             <li>
-              <Link to="/profile">
-                {user.nombre}
-              </Link>
+              <Link to="/profile">{user.nombre}</Link>
               <div className="uk-navbar-dropdown">
                 <ul className="uk-nav uk-navbar-dropdown-nav">
                   <li>
