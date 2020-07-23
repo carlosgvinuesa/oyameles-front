@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "~redux/AuthDuck";
 import { useHistory } from "react-router-dom";
+import "./NavBar.css"
 
 const Navbar = () => {
   const user = useSelector((state) => state.user.data);
@@ -15,8 +16,7 @@ const Navbar = () => {
   };
   return (
     <nav
-      style={{ backgroundColor: "#74967e"}}
-      className="uk-navbar-container"
+      className="bgcol"
       uk-navbar="true"
     >
       <div className="uk-navbar-left">

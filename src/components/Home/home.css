@@ -1,0 +1,18 @@
+.logo {
+  background-image: url(../../assets/images/nevado-de-toluca-focos-rojos-que-el-estado-mexicano-no-quiere-ver-1480974789.jpg);
+  background-size: cover;
+  height: 400px
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  font-size:  100px;
+  color: #063b0b;
+  font-family: 'Montserrat', sans-serif;
+}
+
